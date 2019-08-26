@@ -8,7 +8,8 @@ class CodeEditor extends React.Component {
     super();
     this.state = {
       code: "// type your code... \n",
-      theme: "vs-light"
+      theme: "vs-light",
+      ref: null
     };
   }
 
@@ -41,7 +42,7 @@ class CodeEditor extends React.Component {
   };
 
   render() {
-    const { code, theme } = this.state;
+    const { code, theme, ref } = this.state;
     const options = {
       selectOnLineNumbers: true,
       roundedSelection: false,
@@ -50,7 +51,16 @@ class CodeEditor extends React.Component {
       automaticLayout: false
     };
     return (
-      <div>
+      <div
+        ref={r => {
+          if (!this.state.ref) {
+            // this isn't ideal but it's the only way I could think of to update the component once we have a ref
+            this.setState({
+              ref: r
+            });
+          }
+        }}
+      >
         <div>
           <button onClick={this.changeEditorValue} type="button">
             Change value
@@ -66,16 +76,19 @@ class CodeEditor extends React.Component {
           </button>
         </div>
         <hr />
-        <MonacoEditor
-          height="400"
-          width="400"
-          language="javascript"
-          value={code}
-          options={options}
-          onChange={this.onChange}
-          editorDidMount={this.editorDidMount}
-          theme={theme}
-        />
+        {ref && (
+          <MonacoEditor
+            height="400"
+            width="400"
+            language="javascript"
+            value={code}
+            options={options}
+            onChange={this.onChange}
+            editorDidMount={this.editorDidMount}
+            theme={theme}
+            context={ref ? ref.ownerDocument.defaultView : window}
+          />
+        )}
       </div>
     );
   }
