@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 import { render } from "react-dom";
 import MonacoEditor, { MonacoDiffEditor } from "react-monaco-editor";
+import ExternalWindowPortal from "./ExternalWindowPortal";
 
 class CodeEditor extends React.Component {
   constructor() {
@@ -67,6 +68,7 @@ class CodeEditor extends React.Component {
         <hr />
         <MonacoEditor
           height="400"
+          width="400"
           language="javascript"
           value={code}
           options={options}
@@ -187,17 +189,29 @@ class DiffEditor extends React.Component {
   }
 }
 
-const App = () => (
-  <div>
-    <h2>Monaco Editor Sample (controlled mode)</h2>
-    <CodeEditor />
-    <hr />
-    <h2>Another editor (uncontrolled mode)</h2>
-    <AnotherEditor />
-    <hr />
-    <h2>Another editor (showing a diff)</h2>
-    <DiffEditor />
-  </div>
-);
+const App = () => {
+  const [isEjected, setEjected] = useState(false);
+  return (
+    <div>
+      <h2>Monaco Editor Sample (controlled mode)</h2>
+      <button onClick={() => setEjected(!isEjected)} type="button">
+        Toggle ejected state
+      </button>
+      {isEjected ? (
+        <ExternalWindowPortal listenForUnload={() => setEjected(false)}>
+          <CodeEditor />
+        </ExternalWindowPortal>
+      ) : (
+        <CodeEditor />
+      )}
+      <hr />
+      <h2>Another editor (uncontrolled mode)</h2>
+      <AnotherEditor />
+      <hr />
+      <h2>Another editor (showing a diff)</h2>
+      <DiffEditor />
+    </div>
+  );
+};
 
 render(<App />, document.getElementById("root"));
